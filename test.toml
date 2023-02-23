@@ -1,0 +1,20 @@
+rootfs_path = "/"
+
+[[task_config]]
+
+mount = []
+exec = ""
+args = []
+
+
+[task_config.config]
+user = "root"
+group = "root"
+cwd="~"
+env="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+cgroup_mem_memsw_max = "100000"
+time_limit = "1000"
+max_cpus = "1"
+
+[task_config.meta_data]
+name = "test"
