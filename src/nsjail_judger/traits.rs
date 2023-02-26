@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::nsjail_judger::judger::NsjailTask;
 
 impl NsjailTask {
@@ -14,7 +15,7 @@ impl NsjailTask {
 
         for (key, value) in &self.envs {
             result.push("--env".to_string());
-            result.push(format!("{}={}", &value, &key));
+            result.push(format!("{}={}", &key, &value));
         }
 
         for mount in &self.mount {
@@ -33,18 +34,6 @@ impl NsjailTask {
         }
         result
     }
-
-    pub fn default_fd(&mut self, cursor: usize) {
-        if !self.config.contains_key("log") {
-
-        }
-        if !self.config.contains_key("stdout") {
-
-        }
-        if !self.config.contains_key("report") {
-
-        }
-    }
 }
 
 impl Default for NsjailTask {
@@ -56,7 +45,7 @@ impl Default for NsjailTask {
             exec: "".to_string(),
             args: vec![],
             cwd: "/".to_string(),
-            envs: Default::default(),
+            envs: HashMap::from([("PATH".to_string(), "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin".to_string())]),
         }
     }
 }

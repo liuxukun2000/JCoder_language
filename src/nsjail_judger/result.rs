@@ -32,7 +32,7 @@ impl JudgerResult {
                     .split_ascii_whitespace()
                     .map(|x| x.to_string())
                     .collect::<Vec<String>>();
-                if lines.len() == 15 {
+                if lines.len() >= 15 {
                     return Self {
                         memory: lines[2].parse::<i32>().unwrap_or(-1),
                         time: lines[8].parse::<f32>().unwrap_or(-1.0),

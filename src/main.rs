@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 #[macro_use]
 extern crate lazy_static;
 
@@ -123,7 +121,7 @@ macro_rules! Eval {
             )
         );
     };
-    (compare file $ans: ident to $output: ident, with $args: ident, as $name: ident) => {
+    (compare file $ans: expr, to $output: expr, with $args: expr, as $name: ident) => {
         let mut $name = compare_file(&$ans, &$output, &$args);
         if let Err(ref e) = $name {
             ERRORS.lock().unwrap().push(e.clone());
@@ -137,7 +135,7 @@ macro_rules! Eval {
             );
         }
     };
-    (compare file $ans: ident to $output: ident, as $name: ident) => {
+    (compare file $ans: expr, to $output: expr, as $name: ident) => {
         let mut $name = compare_file(&$ans, &$output, &CompareConfig::default());
         if let Err(ref e) = $name {
             ERRORS.lock().unwrap().push(e.clone());
@@ -184,17 +182,16 @@ fn main() {
     task.config.insert("log".to_string(), "test.log".to_string());
     task.config.insert("stdout".to_string(), "test.out".to_string());
     task.config.insert("report".to_string(), "test.rep".to_string());
-    task.exec = "/bin/ls".to_string();
-    task.args = vec!["/".to_string()];
+    task.cwd = "/oj".to_string();
+    task.exec = "/usr/bin/g++".to_string();
+    task.args = vec!["test.cpp".to_string(), "-o".to_string(), "a.out".to_string()];
+    config.task_config.push(task.clone());
 
+    task.exec = "./a.out".to_string();
+    task.args.clear();
+    config.task_config.push(task.clone());
 
-
-    for i in 0..3 {
-        config.task_config.push(task.clone());
-    }
-
-    config.rootfs_path = "/test".to_string();
-    // println!("{:?}", &task.to_args(&"/".to_string()));
+    config.rootfs_path = "/".to_string();
 
     Eval!(use nsjail with config, as jail);
     Eval!(use tmpfs "/tmp/test1", as x);
@@ -202,11 +199,9 @@ fn main() {
     Eval!(copydir y to x);
     Eval!(mount x to jail at "/test");
     Eval!(run all tasks in jail as result);
-    println!("{:?}", &result);
-    // Eval!(run all tasks in jail);
-    // Eval!(use localfs "/home/satan/language/test", as y;);
-    // Eval!(copydir y to x, with options;);
+    Eval!(compare file "test/1.txt".to_string(), to result[1].output_path, as cmp);
     Eval!(clean);
+
     println!("{:?}", LOGS.lock().unwrap());
     println!("{:?}", ERRORS.lock().unwrap());
 }
