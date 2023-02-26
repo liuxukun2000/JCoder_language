@@ -13,3 +13,5 @@ fs_extra = "*"
 difference = "*"
 toml = "*"
 serde = { version = "*", features = ["derive"] }
+rand = "*"
+random-string = "*"

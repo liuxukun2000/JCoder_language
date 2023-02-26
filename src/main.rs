@@ -18,6 +18,7 @@ use crate::dir_utils::local::{Local, LocalConfig};
 use crate::dir_utils::tmpfs::{Tmpfs, TmpfsConfig};
 use crate::dir_utils::traits::BaseDir;
 use crate::nsjail_judger::judger::{NsjailConfig, NsjailJudger, NsjailTask};
+use crate::nsjail_judger::result::JudgerResult;
 
 lazy_static! {
     static ref USEDDIRS: Mutex<Vec<Arc<Mutex<dyn BaseDir + Send + Sync>>>> = Mutex::new(Vec::new());
@@ -166,8 +167,8 @@ macro_rules! Eval {
     (mount $fs: ident to $judger: ident at $target: literal) => {
         $judger.mount_all($fs, &$target.to_string());
     };
-    (run all tasks in $judger: ident) => {
-        $judger.run_all();
+    (run all tasks in $judger: ident as $name: ident) => {
+        let mut $name = $judger.run_all();
     };
     (run tasks $index: literal in $judger: ident) => {
         $judger.run($index);
@@ -180,34 +181,28 @@ fn main() {
     let mut task = NsjailTask::default();
     // task.config.insert("time_limit".to_string(), "1000".to_string());
     // task.config.insert("cgroup_mem_max".to_string(), "902400".to_string());
-    // task.config.insert("log".to_string(), "test.log".to_string());
-    // task.config.insert("stdout".to_string(), "test.out".to_string());
-    // task.config.insert("report".to_string(), "test.rep".to_string());
+    task.config.insert("log".to_string(), "test.log".to_string());
+    task.config.insert("stdout".to_string(), "test.out".to_string());
+    task.config.insert("report".to_string(), "test.rep".to_string());
     task.exec = "/bin/ls".to_string();
     task.args = vec!["/".to_string()];
 
-    let mut task1 = NsjailTask::default();
-    // task1.config.insert("time_limit".to_string(), "1000".to_string());
-    // task1.config.insert("cgroup_mem_max".to_string(), "902400".to_string());
-    // task1.config.insert("log".to_string(), "test.log".to_string());
-    // task1.config.insert("stdout".to_string(), "test.out".to_string());
-    // task1.config.insert("report".to_string(), "test.rep".to_string());
-    task1.exec = "/bin/ls".to_string();
-    task1.args = vec!["/".to_string()];
 
-    for i in 0..1 {
+
+    for i in 0..3 {
         config.task_config.push(task.clone());
     }
-    config.task_config.push(task1.clone());
-    config.rootfs_path = "/home/satan/language/rootfs".to_string();
+
+    config.rootfs_path = "/test".to_string();
     // println!("{:?}", &task.to_args(&"/".to_string()));
 
     Eval!(use nsjail with config, as jail);
-    // Eval!(use tmpfs "/tmp/test1", as x);
-    // Eval!(use localfs "/home/satan/language/test", as y);
-    // Eval!(copydir y to x);
-    // Eval!(mount x to jail at "/test");
-    Eval!(run all tasks in jail);
+    Eval!(use tmpfs "/tmp/test1", as x);
+    Eval!(use localfs "/home/satan/OJ/JCoder_language/test", as y);
+    Eval!(copydir y to x);
+    Eval!(mount x to jail at "/test");
+    Eval!(run all tasks in jail as result);
+    println!("{:?}", &result);
     // Eval!(run all tasks in jail);
     // Eval!(use localfs "/home/satan/language/test", as y;);
     // Eval!(copydir y to x, with options;);
